@@ -16,7 +16,7 @@ export const actions = {};  // all the loaded actions.
  * Proxy mount function that will add the <Provider> tag.
  * */
 export function mount(rootComponent) {
-  if(!storeObj) {
+  if (!storeObj) {
     init();
   }
   const Provider = reactRedux.Provider;
@@ -47,11 +47,23 @@ export function reducer(name, initialState) {
   return ctx;
 }
 
+/* Checks if any loaded reducer is waiting for a pending promise */
+function hasReducerAction(actionType, status) {
+  let names = Object.keys(LOADED_REDUCERS);
+  for(let i=0; i < names.length; i++) {
+    let reducerObj = LOADED_REDUCERS[names[i]];
+    if(reducerObj.hasListenerStatus(actionType, status)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 
 /* Boot up the tredux wrapper */
 export function init() {
   const middleware = [thunk];
-  if(NODE_ENV !== 'production') {
+  if (NODE_ENV !== 'production') {
     middleware.push(createLogger());
   }
   middleware.push(proxyListener);
@@ -73,25 +85,25 @@ export function getInitialState() {
 
 /* Dispatch proxy */
 export function dispatch(actionType, payload) {
-  if(!storeObj) {
+  if (!storeObj) {
     console.warn('tredux: dispatch() is not yet available.');
     return;
   }
   // dispatch({type:, payload})
-  if(typeof actionType === 'object' && actionType) {
-    if(actionType.payload && typeof actionType.payload.then === 'function' && typeof actionType.payload.catch === 'function') {
+  if (typeof actionType === 'object' && actionType) {
+    if (actionType.promise && typeof actionType.promise.then === 'function' && typeof actionType.promise.catch === 'function') {
       return dispatchPromise(actionType);
     }
     return storeObj.dispatch(actionType);
   }
   // dispatch('myType', {payload})
-  if(typeof payload !== 'object' || !payload) payload = {};
+  if (typeof payload !== 'object' || !payload) payload = {};
   const dispatchData = {
     type: actionType,
     payload: payload
   };
   // check if we have a promise payload
-  if(typeof payload.then === 'function' && typeof payload.catch === 'function') {
+  if (typeof payload.promise === 'object' && typeof payload.promise.catch === 'function') {
     return dispatchPromise(actionType, payload);
   }
   return storeObj.dispatch(dispatchData);
@@ -100,28 +112,35 @@ export function dispatch(actionType, payload) {
 /* Dispatches a promise. It does so by dispatching 3 events on it. */
 function dispatchPromise(action) {
   let isDone = false,
-    promiseObj = action.payload;
-  delete action.payload;
+    promiseObj = action.promise;
+  delete action.promise;
   let wrappedPayload = {
     type: action.type,
     status: 'pending'
   };
-  if(typeof action.original === 'object' && action.original) {
-    wrappedPayload.original = action.original;
+  let requestPayload;
+  if (typeof action.payload === 'object' && action.payload) {
+    requestPayload = Object.assign({}, action.payload);
   }
-  storeObj.dispatch(wrappedPayload);
+  if(hasReducerAction(wrappedPayload.type, 'pending')) {
+    storeObj.dispatch(wrappedPayload);
+  }
+  if (requestPayload)wrappedPayload.request = requestPayload;
   promiseObj.then((res) => {
-    if(isDone) return; isDone = true;
+    if (isDone) return;
+    isDone = true;
     wrappedPayload.status = 'success';
     wrappedPayload.payload = res;
     storeObj.dispatch(wrappedPayload);
   }, (err) => {
-    if(isDone) return; isDone = true;
+    if (isDone) return;
+    isDone = true;
     wrappedPayload.status = 'error';
     wrappedPayload.payload = err;
     storeObj.dispatch(wrappedPayload);
   }).catch((e) => {
-    if(isDone) return; isDone = true;
+    if (isDone) return;
+    isDone = true;
     wrappedPayload.status = 'error';
     wrappedPayload.payload = e;
     storeObj.dispatch(wrappedPayload);
@@ -130,7 +149,7 @@ function dispatchPromise(action) {
 
 /* Proxy getState */
 export function getState() {
-  if(!storeObj) {
+  if (!storeObj) {
     console.warn('tredux: getState() is not yet available.');
     return null;
   }
@@ -139,7 +158,7 @@ export function getState() {
 
 /* Proxy replaceReducer */
 export function replaceReducer() {
-  if(!storeObj) {
+  if (!storeObj) {
     console.warn('tredux: replaceReducer() is not yet available.');
     return;
   }
@@ -148,20 +167,20 @@ export function replaceReducer() {
 
 /* proxy subscribe */
 export function subscribe(fn) {
-  if(storeObj) return storeObj.subscribe.apply(storeObj, arguments);
+  if (storeObj) return storeObj.subscribe.apply(storeObj, arguments);
   PROXY_SUBSCRIPTIONS.push(fn);
   return this;
 }
 
 /* Exposes the given actions. */
 export function addActions(reducerName, actionsMap) {
-  if(typeof reducerName !== 'string') {
+  if (typeof reducerName !== 'string') {
     console.warn('tredux.addAction: action must be a string.');
     return;
   }
-  if(typeof actions[reducerName] === 'undefined') actions[reducerName] = {};
+  if (typeof actions[reducerName] === 'undefined') actions[reducerName] = {};
   Object.keys(actionsMap).forEach((actionName) => {
-    if(typeof actionsMap[actionName] === 'function') {
+    if (typeof actionsMap[actionName] === 'function') {
       actions[reducerName][actionName] = actionsMap[actionName];
     }
   });
@@ -179,38 +198,38 @@ export function addActions(reducerName, actionsMap) {
  * */
 export function addListener(types, fn) {
   let events = {};  // this is our {actionType:fn} object.
-  if(typeof types === 'string' && typeof fn === 'function') {
+  if (typeof types === 'string' && typeof fn === 'function') {
     events[types] = fn;
-  } else if(types instanceof Array) {
-    for(var i=0; i < types.length-1; i+=2) {
+  } else if (types instanceof Array) {
+    for (var i = 0; i < types.length - 1; i += 2) {
       let eventName = types[i],
-        eventFn = types[i+1];
+        eventFn = types[i + 1];
       events[eventName] = eventFn;
     }
   }
   Object.keys(events).forEach((eName) => {
     let eFn = events[eName];
-    if(typeof eName !== 'string') {
+    if (typeof eName !== 'string') {
       console.warn("Received invalid event name in addListener:");
       console.warn(eFn);
       return;
     }
-    if(typeof LISTENERS[eName] === 'undefined') LISTENERS[eName] = [];
+    if (typeof LISTENERS[eName] === 'undefined') LISTENERS[eName] = [];
     LISTENERS[eName].push(eFn);
   });
   let isUnsubscribed = false;
   return {
     remove: () => {
-      if(isUnsubscribed) return;
+      if (isUnsubscribed) return;
       isUnsubscribed = true;
       setImmediate(() => {
         Object.keys(events).forEach((eName) => {
           let eFn = events[eName];
-          if(typeof LISTENERS[eName] === 'undefined') return;
-          for(let i=0; i < LISTENERS[eName].length; i++) {
-            if(LISTENERS[eName][i] !== eFn) continue;
+          if (typeof LISTENERS[eName] === 'undefined') return;
+          for (let i = 0; i < LISTENERS[eName].length; i++) {
+            if (LISTENERS[eName][i] !== eFn) continue;
             LISTENERS[eName].splice(i, 1);
-            if(LISTENERS[eName].length === 0) {
+            if (LISTENERS[eName].length === 0) {
               delete LISTENERS[eName];
             }
             return;
@@ -225,8 +244,8 @@ export function addListener(types, fn) {
 
 /* This will "emit" an event / payload to any listeners. */
 export function emit(eventName, payload) {
-  if(typeof LISTENERS[eventName] === 'undefined') return;
-  for(let i=0; i < LISTENERS[eventName].length; i++) {
+  if (typeof LISTENERS[eventName] === 'undefined') return;
+  for (let i = 0; i < LISTENERS[eventName].length; i++) {
     LISTENERS[eventName][i](payload);
   }
 }

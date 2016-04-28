@@ -9,6 +9,14 @@ export function createReducer(name, initialState) {
   ctx.getInitialState = () => initialState;
   ctx.setInitialState = (v) => initialState = v;
 
+  ctx.hasListenerStatus = function HasPendingPromiseListener(actionType, status) {
+    if(typeof handlers[actionType] === 'undefined') return false;
+    for(let i=0; i < handlers[actionType].length; i++) {
+      if(handlers[actionType][i].status === status) return true;
+    }
+    return false;
+  }
+
   /* Register a new reducer handle. */
   ctx.handle = function HandleAction(code, fn, _handlePromiseStatus) {
     if(typeof code === 'undefined') {
@@ -44,7 +52,7 @@ export function createReducer(name, initialState) {
       for(let i=0; i < handlerFns.length; i++) {
         let item = handlerFns[i];
         if(item.status !== actionStatus) continue;
-        let res = item.fn(state, handlerPayload || {}, action.original || {});
+        let res = item.fn(state, handlerPayload || {}, action.request || {});
         if(typeof res === 'object' && res) {
           hasChanges = true;
           finalState = Object.assign({}, finalState, res);
