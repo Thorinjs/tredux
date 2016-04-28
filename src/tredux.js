@@ -11,7 +11,7 @@ const LOADED_REDUCERS = {},
   PROXY_SUBSCRIPTIONS = [];
 
 let storeObj = null;
-
+export const actions = {};  // all the loaded actions.
 /*
  * Proxy mount function that will add the <Provider> tag.
  * */
@@ -106,6 +106,9 @@ function dispatchPromise(action) {
     type: action.type,
     status: 'pending'
   };
+  if(typeof action.original === 'object' && action.original) {
+    wrappedPayload.original = action.original;
+  }
   storeObj.dispatch(wrappedPayload);
   promiseObj.then((res) => {
     if(isDone) return; isDone = true;
@@ -150,6 +153,19 @@ export function subscribe(fn) {
   return this;
 }
 
+/* Exposes the given actions. */
+export function addActions(reducerName, actionsMap) {
+  if(typeof reducerName !== 'string') {
+    console.warn('tredux.addAction: action must be a string.');
+    return;
+  }
+  if(typeof actions[reducerName] === 'undefined') actions[reducerName] = {};
+  Object.keys(actionsMap).forEach((actionName) => {
+    if(typeof actionsMap[actionName] === 'function') {
+      actions[reducerName][actionName] = actionsMap[actionName];
+    }
+  });
+}
 
 /*
  * Adds a listener to the event system.

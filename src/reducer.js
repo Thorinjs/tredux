@@ -44,7 +44,7 @@ export function createReducer(name, initialState) {
       for(let i=0; i < handlerFns.length; i++) {
         let item = handlerFns[i];
         if(item.status !== actionStatus) continue;
-        let res = item.fn(state, handlerPayload || {});
+        let res = item.fn(state, handlerPayload || {}, action.original || {});
         if(typeof res === 'object' && res) {
           hasChanges = true;
           finalState = Object.assign({}, finalState, res);
