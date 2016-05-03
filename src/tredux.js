@@ -8,7 +8,8 @@ const redux = require('redux'),
 
 const LOADED_REDUCERS = {},
   LISTENERS = {},
-  PROXY_SUBSCRIPTIONS = [];
+  PROXY_SUBSCRIPTIONS = [],
+  PENDING_DISPATCHERS = [];
 
 let storeObj = null;
 export const actions = {};  // all the loaded actions.
@@ -69,6 +70,9 @@ export function init() {
   middleware.push(proxyListener);
   const appReducers = combineReducers(prepareReducers());
   storeObj = createStore(appReducers, applyMiddleware.apply(redux, middleware));
+  for(let i=0; i < PENDING_DISPATCHERS.length; i++) {
+    dispatch.apply(this, PENDING_DISPATCHERS[i]);
+  }
   return storeObj;
 }
 
@@ -86,7 +90,7 @@ export function getInitialState() {
 /* Dispatch proxy */
 export function dispatch(actionType, payload) {
   if (!storeObj) {
-    console.warn('tredux: dispatch() is not yet available.');
+    PENDING_DISPATCHERS.push(arguments);
     return;
   }
   // dispatch({type:, payload})
