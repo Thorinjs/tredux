@@ -184,7 +184,7 @@ export function addActions(reducerName, actionsMap) {
   }
   if (typeof actions[reducerName] === 'undefined') actions[reducerName] = {};
   Object.keys(actionsMap).forEach((actionName) => {
-    if (typeof actionsMap[actionName] === 'function') {
+    if (typeof actionsMap[actionName] === 'function' || (typeof actionsMap[actionName] === 'object' && actionsMap[actionName])) {
       actions[reducerName][actionName] = actionsMap[actionName];
     }
   });
