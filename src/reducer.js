@@ -44,21 +44,17 @@ export function createReducer(name, initialState) {
     return function Reduce(state = initialState, action = null) {
       if(typeof handlers[action.type] === 'undefined') return state;
       const handlerPayload = (typeof action.payload === 'object' ? action.payload : action);
-      var res,
-        handlerFns = handlers[action.type];
+      var handlerFns = handlers[action.type];
       let actionStatus = (typeof action.status === 'string' ? action.status : 'success'),
-        finalState = Object.assign({}, state, res),
-        hasChanges = false;
+        finalState = Object.assign({}, state);
       for(let i=0; i < handlerFns.length; i++) {
         let item = handlerFns[i];
         if(item.status !== actionStatus) continue;
         let res = item.fn(state, handlerPayload || {}, action.request || {});
         if(typeof res === 'object' && res) {
-          hasChanges = true;
           finalState = Object.assign({}, finalState, res);
         }
       }
-      if(!hasChanges) return state;
       return finalState;
     }
   };
