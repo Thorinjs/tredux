@@ -12,7 +12,10 @@ const LOADED_REDUCERS = {},
   PENDING_DISPATCHERS = [];
 
 let storeObj = null;
-export const actions = {};  // all the loaded actions.
+export function actions(name) { // all the loaded actions.
+  return actions[name];
+}
+
 /*
  * Proxy mount function that will add the <Provider> tag.
  * */
@@ -43,6 +46,9 @@ export function connect() {
  * Registers a new reducer in the store.
  * */
 export function reducer(name, initialState) {
+  if(typeof LOADED_REDUCERS[name] !== 'undefined') {
+    return LOADED_REDUCERS[name];
+  }
   let ctx = createReducer(name, initialState);
   LOADED_REDUCERS[name] = ctx;
   return ctx;
