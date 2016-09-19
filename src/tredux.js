@@ -1,5 +1,6 @@
 'use strict';
 const redux = require('redux'),
+  deepAssign = require('deep-assign'),
   reactRedux = require('react-redux'),
   { createStore, applyMiddleware, combineReducers } = redux,
   createLogger = require('redux-logger'),
@@ -15,7 +16,9 @@ let storeObj = null;
 export function actions(name) { // all the loaded actions.
   return actions[name];
 }
-
+export function assign() {
+  return deepAssign.apply(this, arguments);
+}
 /*
  * Proxy mount function that will add the <Provider> tag.
  * */
@@ -130,7 +133,7 @@ function dispatchPromise(action) {
   };
   let requestPayload;
   if (typeof action.payload === 'object' && action.payload) {
-    requestPayload = Object.assign({}, action.payload);
+    requestPayload = deepAssign({}, action.payload);
   }
   if(hasReducerAction(wrappedPayload.type, 'pending')) {
     storeObj.dispatch(wrappedPayload);

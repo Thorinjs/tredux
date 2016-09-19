@@ -1,7 +1,7 @@
 {
   "name": "tredux",
   "author": "Stiudeo",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "scripts": {
     "build": "babel src --out-dir lib",
     "dev": "babel src --out-dir lib --watch"
@@ -27,11 +27,12 @@
     "url": "https://github.com/Stiudeo/tredux/issues"
   },
   "dependencies": {
-    "react-redux": "^4.4.5",
-    "redux": "^3.5.2",
-    "redux-logger": "^2.6.1",
-    "redux-promise": "^0.5.3",
-    "redux-thunk": "^2.0.1"
+    "deep-assign": "2.0.0",
+    "react-redux": "4.4.5",
+    "redux": "3.5.2",
+    "redux-logger": "2.6.1",
+    "redux-promise": "0.5.3",
+    "redux-thunk": "2.0.1"
   },
   "peerDependencies": {
     "react": "^0.14.0 || ^15.0.x"

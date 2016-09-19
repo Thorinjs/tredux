@@ -1,4 +1,6 @@
 'use strict';
+const deepAssign = require('deep-assign');
+
 
 export function createReducer(name, initialState) {
   if(typeof initialState !== 'object' || !initialState) initialState = {};
@@ -46,13 +48,13 @@ export function createReducer(name, initialState) {
       const handlerPayload = (typeof action.payload === 'object' ? action.payload : action);
       var handlerFns = handlers[action.type];
       let actionStatus = (typeof action.status === 'string' ? action.status : 'success'),
-        finalState = Object.assign({}, state);
+        finalState = deepAssign({}, state);
       for(let i=0; i < handlerFns.length; i++) {
         let item = handlerFns[i];
         if(item.status !== actionStatus) continue;
         let res = item.fn(state, handlerPayload || {}, action.request || {});
         if(typeof res === 'object' && res) {
-          finalState = Object.assign({}, finalState, res);
+          finalState = deepAssign({}, finalState, res);
         }
       }
       return finalState;
