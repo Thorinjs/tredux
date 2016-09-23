@@ -138,7 +138,7 @@ function dispatchPromise(action) {
   if(hasReducerAction(wrappedPayload.type, 'pending')) {
     storeObj.dispatch(wrappedPayload);
   }
-  if (requestPayload)wrappedPayload.request = requestPayload;
+  if (requestPayload) wrappedPayload.request = requestPayload;
   promiseObj.then((res) => {
     if (isDone) return;
     isDone = true;
@@ -158,6 +158,7 @@ function dispatchPromise(action) {
     wrappedPayload.payload = e;
     storeObj.dispatch(wrappedPayload);
   });
+  return promiseObj;
 }
 
 /* Proxy getState */

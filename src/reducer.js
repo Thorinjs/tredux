@@ -52,7 +52,7 @@ export function createReducer(name, initialState) {
       for(let i=0; i < handlerFns.length; i++) {
         let item = handlerFns[i];
         if(item.status !== actionStatus) continue;
-        let res = item.fn(state, handlerPayload || {}, action.request || {});
+        let res = item.fn(finalState, handlerPayload || {}, action.request || {});
         if(typeof res === 'object' && res) {
           finalState = deepAssign({}, finalState, res);
         }
