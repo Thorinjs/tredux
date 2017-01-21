@@ -2,9 +2,9 @@
 const redux = require('redux'),
   deepAssign = require('deep-assign'),
   reactRedux = require('react-redux'),
-  { createStore, applyMiddleware, combineReducers } = redux,
+  {createStore, applyMiddleware, combineReducers} = redux,
   createLogger = require('redux-logger'),
-  { createReducer } = require('./reducer'),
+  {createReducer} = require('./reducer'),
   thunk = require('redux-thunk').default;
 
 const LOADED_REDUCERS = {},
@@ -13,6 +13,9 @@ const LOADED_REDUCERS = {},
   PENDING_DISPATCHERS = [];
 
 let storeObj = null;
+export function isReady() {
+  return storeObj != null;
+}
 export function actions(name) { // all the loaded actions.
   return actions[name];
 }
@@ -49,7 +52,7 @@ export function connect() {
  * Registers a new reducer in the store.
  * */
 export function reducer(name, initialState) {
-  if(typeof LOADED_REDUCERS[name] !== 'undefined') {
+  if (typeof LOADED_REDUCERS[name] !== 'undefined') {
     return LOADED_REDUCERS[name];
   }
   let ctx = createReducer(name, initialState);
@@ -60,9 +63,9 @@ export function reducer(name, initialState) {
 /* Checks if any loaded reducer is waiting for a pending promise */
 function hasReducerAction(actionType, status) {
   let names = Object.keys(LOADED_REDUCERS);
-  for(let i=0; i < names.length; i++) {
+  for (let i = 0; i < names.length; i++) {
     let reducerObj = LOADED_REDUCERS[names[i]];
-    if(reducerObj.hasListenerStatus(actionType, status)) {
+    if (reducerObj.hasListenerStatus(actionType, status)) {
       return true;
     }
   }
@@ -79,7 +82,7 @@ export function init() {
   middleware.push(proxyListener);
   const appReducers = combineReducers(prepareReducers());
   storeObj = createStore(appReducers, applyMiddleware.apply(redux, middleware));
-  for(let i=0; i < PENDING_DISPATCHERS.length; i++) {
+  for (let i = 0; i < PENDING_DISPATCHERS.length; i++) {
     dispatch.apply(this, PENDING_DISPATCHERS[i]);
   }
   return storeObj;
@@ -135,7 +138,7 @@ function dispatchPromise(action) {
   if (typeof action.payload === 'object' && action.payload) {
     requestPayload = deepAssign({}, action.payload);
   }
-  if(hasReducerAction(wrappedPayload.type, 'pending')) {
+  if (hasReducerAction(wrappedPayload.type, 'pending')) {
     storeObj.dispatch(wrappedPayload);
   }
   if (requestPayload) wrappedPayload.request = requestPayload;
