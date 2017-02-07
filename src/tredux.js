@@ -105,6 +105,7 @@ export function dispatch(actionType, payload) {
     PENDING_DISPATCHERS.push(arguments);
     return;
   }
+
   // dispatch({type:, payload})
   if (typeof actionType === 'object' && actionType) {
     if (actionType.promise && typeof actionType.promise.then === 'function' && typeof actionType.promise.catch === 'function') {
