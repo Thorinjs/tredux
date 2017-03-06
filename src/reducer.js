@@ -9,7 +9,12 @@ export function createReducer(name, initialState) {
     name: name
   };
   ctx.getInitialState = () => initialState;
-  ctx.setInitialState = (v) => initialState = v;
+  ctx.setInitialState = (v, merge) => {
+    if (merge === true) {
+      v = Object.assign({}, initialState, v || {});
+    }
+    initialState = v;
+  };
 
   ctx.hasListenerStatus = function HasPendingPromiseListener(actionType, status) {
     if (typeof handlers[actionType] === 'undefined') return false;
