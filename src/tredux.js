@@ -262,6 +262,10 @@ export function addListener(types, fn) {
 
 /* This will "emit" an event / payload to any listeners. */
 export function emit(eventName, payload) {
+  if (typeof eventName === 'object' && eventName && typeof eventName.type === 'string') {
+    payload = eventName.payload || {};
+    eventName = eventName.type;
+  }
   if (typeof LISTENERS[eventName] === 'undefined') return;
   for (let i = 0; i < LISTENERS[eventName].length; i++) {
     LISTENERS[eventName][i](payload);
