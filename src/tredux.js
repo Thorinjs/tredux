@@ -222,7 +222,7 @@ export function addListener(types, fn) {
     for (var i = 0; i < types.length - 1; i += 2) {
       let eventName = types[i],
         eventFn = types[i + 1];
-      events[eventName] = eventFn;
+      events[eventName] = (typeof eventFn === 'function' ? eventFn : fn);
     }
   }
   Object.keys(events).forEach((eName) => {
