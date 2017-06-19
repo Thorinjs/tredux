@@ -144,23 +144,26 @@ function dispatchPromise(action) {
   }
   if (requestPayload) wrappedPayload.request = requestPayload;
   promiseObj.then((res) => {
-    if (isDone) return;
+    if (isDone) return res;
     isDone = true;
     wrappedPayload.status = 'success';
     wrappedPayload.payload = res;
     storeObj.dispatch(wrappedPayload);
+    return res;
   }, (err) => {
-    if (isDone) return;
+    if (isDone) return err;
     isDone = true;
     wrappedPayload.status = 'error';
     wrappedPayload.payload = err;
     storeObj.dispatch(wrappedPayload);
+    return err;
   }).catch((e) => {
-    if (isDone) return;
+    if (isDone) return e;
     isDone = true;
     wrappedPayload.status = 'error';
     wrappedPayload.payload = e;
     storeObj.dispatch(wrappedPayload);
+    return e;
   });
   return promiseObj;
 }

@@ -1,7 +1,7 @@
 {
   "name": "tredux",
   "author": "UNLOQ Systems",
-  "version": "1.0.20",
+  "version": "1.0.22",
   "scripts": {
     "build": "babel src --out-dir lib",
     "dev": "babel src --out-dir lib --watch"
