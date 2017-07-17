@@ -193,6 +193,11 @@ export function subscribe(fn) {
   return this;
 }
 
+/* Expore the store object */
+export function getStore() {
+  return storeObj;
+}
+
 /* Exposes the given actions. */
 export function addActions(reducerName, actionsMap) {
   if (typeof reducerName !== 'string') {
