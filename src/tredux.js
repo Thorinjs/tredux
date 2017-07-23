@@ -9,6 +9,7 @@ const redux = require('redux'),
 
 const LOADED_REDUCERS = {},
   LISTENERS = {},
+  PERSISTERS = [],
   PROXY_SUBSCRIPTIONS = [],
   PENDING_DISPATCHERS = [];
 
@@ -37,6 +38,15 @@ export function mount(rootComponent) {
   )
 }
 
+export function persist(callback) {
+  if(typeof callback !== 'function') {
+    console.error(`tredux.persist() requires a callback function`);
+    return false;
+  }
+  PERSISTERS.push(callback);
+  return this;
+}
+
 /*
  * Proxy connect() to connect a given instance.
  * */
@@ -55,9 +65,16 @@ export function reducer(name, initialState) {
   if (typeof LOADED_REDUCERS[name] !== 'undefined') {
     return LOADED_REDUCERS[name];
   }
-  let ctx = createReducer(name, initialState);
+  let ctx = createReducer(name, initialState, PERSISTERS);
   LOADED_REDUCERS[name] = ctx;
   return ctx;
+}
+
+export function getReducer(name) {
+  return LOADED_REDUCERS[name] || null;
+}
+export function getReducers() {
+  return LOADED_REDUCERS;
 }
 
 /* Checks if any loaded reducer is waiting for a pending promise */
@@ -76,7 +93,16 @@ function hasReducerAction(actionType, status) {
 /* Boot up the tredux wrapper */
 export function init() {
   const middleware = [thunk];
-  if (NODE_ENV !== 'production') {
+  let hasLogger = false;
+  try {
+    if(NODE_ENV !== 'production') {
+      hasLogger = true;
+    }
+    if(TREDUX_LOGGER === false) {
+      hasLogger = false;
+    }
+  } catch(e) {}
+  if(hasLogger) {
     middleware.push(createLogger());
   }
   middleware.push(proxyListener);

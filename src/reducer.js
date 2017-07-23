@@ -2,11 +2,12 @@
 const deepAssign = require('deep-assign');
 
 
-export function createReducer(name, initialState) {
+export function createReducer(name, initialState, PERSISTERS) {
   if (typeof initialState !== 'object' || !initialState) initialState = {};
   const handlers = {};
   const ctx = {
-    name: name
+    name: name,
+    _persist: false
   };
   ctx.getInitialState = () => initialState;
   ctx.setInitialState = (v, merge) => {
@@ -45,6 +46,15 @@ export function createReducer(name, initialState) {
     return ctx;
   };
 
+  ctx.persist = function(key) {
+    if(typeof key === 'string' && key) {
+      ctx._persist = key;
+    } else {
+      ctx._persist = false;
+    }
+    return ctx;
+  };
+
   /* Prepares the wrapper function */
   ctx.prepare = function ReducerWrapper() {
 
@@ -60,6 +70,16 @@ export function createReducer(name, initialState) {
         let res = item.fn(finalState, handlerPayload || {}, action.request || {});
         if (typeof res !== 'undefined' && typeof res === 'object' && res) {
           finalState = deepAssign({}, finalState, res);
+        }
+      }
+      if(ctx._persist !== false) {
+        for(let i=0; i < PERSISTERS.length; i++) {
+          try {
+            PERSISTERS[i](ctx._persist, finalState);
+          } catch(e) {
+            console.log(`tredux.persist() failed to save reducer state`);
+            console.log(e);
+          }
         }
       }
       return finalState;
