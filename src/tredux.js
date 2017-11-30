@@ -19,6 +19,10 @@ export function isReady() {
   return storeObj != null;
 }
 export function actions(name) { // all the loaded actions.
+  if (typeof name !== 'string') return null;
+  if (typeof actions[name] === 'undefined') {
+    actions[name] = {};
+  }
   return actions[name];
 }
 export function assign() {
