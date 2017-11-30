@@ -14,15 +14,23 @@ const LOADED_REDUCERS = {},
   PENDING_DISPATCHERS = [];
 
 let storeObj = null;
+
 export function isReady() {
   return storeObj != null;
 }
+
 export function actions(name) { // all the loaded actions.
+  if (typeof name !== 'string') return null;
+  if (typeof actions[name] === 'undefined') {
+    actions[name] = {};
+  }
   return actions[name];
 }
+
 export function assign() {
   return deepAssign.apply(this, arguments);
 }
+
 /*
  * Proxy mount function that will add the <Provider> tag.
  * */
@@ -39,7 +47,7 @@ export function mount(rootComponent) {
 }
 
 export function persist(callback) {
-  if(typeof callback !== 'function') {
+  if (typeof callback !== 'function') {
     console.error(`tredux.persist() requires a callback function`);
     return false;
   }
@@ -73,6 +81,7 @@ export function reducer(name, initialState) {
 export function getReducer(name) {
   return LOADED_REDUCERS[name] || null;
 }
+
 export function getReducers() {
   return LOADED_REDUCERS;
 }
@@ -95,14 +104,15 @@ export function init() {
   const middleware = [thunk];
   let hasLogger = false;
   try {
-    if(NODE_ENV !== 'production') {
+    if (NODE_ENV !== 'production') {
       hasLogger = true;
     }
-    if(TREDUX_LOGGER === false) {
+    if (TREDUX_LOGGER === false) {
       hasLogger = false;
     }
-  } catch(e) {}
-  if(hasLogger) {
+  } catch (e) {
+  }
+  if (hasLogger) {
     middleware.push(createLogger());
   }
   middleware.push(proxyListener);
