@@ -3,6 +3,7 @@ let _logger = require('redux-logger');
 const redux = require('redux'),
   deepAssign = require('deep-assign'),
   reactRedux = require('react-redux'),
+  React = require('react'),
   {createStore, applyMiddleware, combineReducers} = redux,
   createLogger = (typeof _logger === 'object' && _logger && typeof _logger.createLogger === 'function') ? _logger.createLogger : _logger,
   {createReducer} = require('./reducer'),
