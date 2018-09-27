@@ -15,16 +15,6 @@ export function createReducer(name, initialState, PERSISTERS) {
       v = Object.assign({}, initialState, v || {});
     }
     initialState = v;
-    if(ctx._persist !== false) {
-      for(let i=0; i < PERSISTERS.length; i++) {
-        try {
-          PERSISTERS[i](ctx._persist, initialState);
-        } catch(e) {
-          console.log(`tredux.persist() failed to save reducer state`);
-          console.log(e);
-        }
-      }
-    }
   };
 
   ctx.hasListenerStatus = function HasPendingPromiseListener(actionType, status) {
@@ -56,8 +46,8 @@ export function createReducer(name, initialState, PERSISTERS) {
     return ctx;
   };
 
-  ctx.persist = function(key) {
-    if(typeof key === 'string' && key) {
+  ctx.persist = function (key) {
+    if (typeof key === 'string' && key) {
       ctx._persist = key;
     } else {
       ctx._persist = false;
@@ -67,7 +57,16 @@ export function createReducer(name, initialState, PERSISTERS) {
 
   /* Prepares the wrapper function */
   ctx.prepare = function ReducerWrapper() {
-
+    if(ctx._persist !== false) {
+      for(let i=0; i < PERSISTERS.length; i++) {
+        try {
+          PERSISTERS[i](ctx._persist, initialState);
+        } catch(e) {
+          console.log(`tredux.persist() failed to save reducer state`);
+          console.log(e);
+        }
+      }
+    }
     return function Reduce(state = initialState, action = null) {
       if (typeof handlers[action.type] === 'undefined') return state;
       const handlerPayload = (typeof action.payload === 'object' ? action.payload : action);
@@ -82,11 +81,11 @@ export function createReducer(name, initialState, PERSISTERS) {
           finalState = deepAssign({}, finalState, res);
         }
       }
-      if(ctx._persist !== false) {
-        for(let i=0; i < PERSISTERS.length; i++) {
+      if (ctx._persist !== false) {
+        for (let i = 0; i < PERSISTERS.length; i++) {
           try {
             PERSISTERS[i](ctx._persist, finalState);
-          } catch(e) {
+          } catch (e) {
             console.log(`tredux.persist() failed to save reducer state`);
             console.log(e);
           }
