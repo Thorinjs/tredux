@@ -15,6 +15,16 @@ export function createReducer(name, initialState, PERSISTERS) {
       v = Object.assign({}, initialState, v || {});
     }
     initialState = v;
+    if(ctx._persist !== false) {
+      for(let i=0; i < PERSISTERS.length; i++) {
+        try {
+          PERSISTERS[i](ctx._persist, initialState);
+        } catch(e) {
+          console.log(`tredux.persist() failed to save reducer state`);
+          console.log(e);
+        }
+      }
+    }
   };
 
   ctx.hasListenerStatus = function HasPendingPromiseListener(actionType, status) {
