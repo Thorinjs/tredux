@@ -1,6 +1,7 @@
 'use strict';
 let _logger = require('redux-logger');
 const redux = require('redux'),
+  treduxForm = require('./form'),
   deepAssign = require('deep-assign'),
   reactRedux = require('react-redux'),
   React = require('react'),
@@ -65,7 +66,7 @@ export function connect() {
     Component = args.pop();
   let connectedFn = reactRedux.connect.apply(reactRedux, args),
     connected = connectedFn(Component);
-  if(typeof Component === 'function') {
+  if (typeof Component === 'function') {
     connected.Class = Component;
   }
   return connected;
@@ -240,6 +241,19 @@ export function getStore() {
   return storeObj;
 }
 
+/**
+ * Returns the state for the given reducer, or the initial state
+ * depending on the ready state.
+ * */
+export function state(name) {
+  if (isReady()) return getState()[name];
+  let red = reducer(name);
+  if (red) {
+    return red.getInitialState();
+  }
+  return null;
+}
+
 /* Exposes the given actions. */
 export function addActions(reducerName, actionsMap) {
   if (typeof reducerName !== 'string') {
@@ -338,3 +352,5 @@ function proxyListener(a) {
     emit(actionType, action.payload);
   }
 }
+
+treduxForm(module.exports);
