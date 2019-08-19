@@ -138,7 +138,7 @@ module.exports = (tredux) => {
     * */
     formObj.change = (key, val) => {
       if (!FormAction) {
-        console.warn(`Clym: change(): form does not have an action set nor was it attached() for: ${formId}`);
+        console.warn(`Tredux: change(): form does not have an action set nor was it attached() for: ${formId}`);
         return;
       }
       if (typeof key === 'string' || typeof key === 'number') {
